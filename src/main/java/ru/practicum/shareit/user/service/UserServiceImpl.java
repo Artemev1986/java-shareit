@@ -23,9 +23,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto addUser(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        if (userStorage.isExistEmail(user.getEmail())) {
-            throw new IllegalArgumentException("User with email (" + user.getEmail() + ") already exist");
-        }
         userStorage.addUser(user);
         log.debug("Adding new user with id: {}", user.getId());
         return UserMapper.toUserDto(user);
@@ -41,19 +38,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
-        User useFromMemory = userStorage.getUserById(userId)
+        userStorage.getUserById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id (" + userId + ") not found"));
         User user = UserMapper.toUser(userDto);
         user.setId(userId);
-        if (userStorage.isExistEmail(user.getEmail())) {
-            throw new RuntimeException("User with email (" + user.getEmail() + ") already exist");
-        }
-        if (user.getEmail() == null) {
-            user.setEmail(useFromMemory.getEmail());
-        }
-        if (user.getName() == null) {
-                user.setName(useFromMemory.getName());
-        }
         userStorage.updateUser(user);
         log.debug("User with id ({}) was updated", user.getId());
         return UserMapper.toUserDto(user);

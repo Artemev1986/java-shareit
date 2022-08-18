@@ -15,6 +15,7 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public void addUser(User user) {
+        checkEmail(user);
         id++;
         user.setId(id);
         users.put(id, user);
@@ -27,6 +28,13 @@ public class UserStorageInMemory implements UserStorage {
 
     @Override
     public void updateUser(User user) {
+        checkEmail(user);
+        if (user.getEmail() == null) {
+            user.setEmail(users.get(user.getId()).getEmail());
+        }
+        if (user.getName() == null) {
+            user.setName(users.get(user.getId()).getName());
+        }
         users.put(user.getId(), user);
     }
 
@@ -40,8 +48,9 @@ public class UserStorageInMemory implements UserStorage {
         users.remove(id);
     }
 
-    @Override
-    public boolean isExistEmail(String email) {
-        return users.values().stream().anyMatch(user -> user.getEmail().equals(email));
+    private void checkEmail(User user) {
+        if (users.values().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
+            throw new IllegalArgumentException("User with email (" + user.getEmail() + ") already exist");
+        }
     }
 }

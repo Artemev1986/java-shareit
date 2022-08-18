@@ -15,6 +15,4 @@ public interface UserStorage {
     List<User> getAllUsers();
 
     void deleteUserById(long id);
-
-    boolean isExistEmail(String email);
 }

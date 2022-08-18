@@ -1,13 +1,15 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.Create;
-import ru.practicum.shareit.Update;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
+import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -15,14 +17,13 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping
-    public UserDto addUser(@RequestBody @Validated(Create.class) UserDto userDto) {
-        return userService.addUser(userDto);
+    public ResponseEntity<UserDto> addUser(@RequestBody @Validated(Create.class) UserDto userDto) {
+        return new ResponseEntity<>(userService.addUser(userDto), HttpStatus.CREATED);
     }
 
     @GetMapping("/{userId}")
@@ -31,13 +32,17 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        List<UserDto> userDtoList = userService.getAllUsers();
+        if (userDtoList.isEmpty()) {
+            return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(userDtoList, HttpStatus.OK);
     }
 
     @PatchMapping(value = "/{userID}")
     public UserDto updateUser(@PathVariable long userID,
-                         @RequestBody @Validated(Update.class) UserDto userDto) {
+                         @RequestBody @Valid UserDto userDto) {
         return userService.updateUser(userID, userDto);
     }
 
