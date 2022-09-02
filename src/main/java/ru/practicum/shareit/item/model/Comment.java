@@ -2,10 +2,10 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Getter
@@ -13,32 +13,33 @@ import java.util.Objects;
 @ToString
 @RequiredArgsConstructor
 @Entity
-@Table(name = "items")
-public class Item {
+@Table(name = "comments")
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name = "name", nullable = false, length = 100)
-    private String name;
-    @Column(name = "description", nullable = false)
-    private String description;
-    @Column(name = "is_available", nullable = false)
-    private Boolean available;
+
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
-    @Transient
-    private Booking lastBooking;
-    @Transient
-    private Booking nextBooking;
+    @JoinColumn(name = "user_id")
+    private User author;
+
+    @ManyToOne
+    @JoinColumn(name = "item_id")
+    private Item item;
+
+    @Column(name = "create_time", nullable = false)
+    private LocalDateTime created = LocalDateTime.now();
+
+    @Column(name = "text", nullable = false, length = 1024)
+    private String text;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Item item = (Item) o;
-        return id != null && Objects.equals(id, item.id);
+        Comment comment = (Comment) o;
+        return id != null && Objects.equals(id, comment.id);
     }
 
     @Override

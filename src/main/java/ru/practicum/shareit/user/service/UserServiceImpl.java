@@ -1,62 +1,59 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
-
-    public UserServiceImpl(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final UserRepository userRepository;
 
     @Override
     public UserDto addUser(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        userStorage.addUser(user);
-        log.debug("Adding new user with id: {}", user.getId());
+        userRepository.save(user);
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto getUserById(long userId) {
-        UserDto userDto = UserMapper.toUserDto(userStorage.getUserById(userId)
+        UserDto userDto = UserMapper.toUserDto(userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id (" + userId + ") not found")));
-        log.debug("User get by id: {}", userId);
         return userDto;
     }
 
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
-        userStorage.getUserById(userId)
+        User updatedUser = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id (" + userId + ") not found"));
-        User user = UserMapper.toUser(userDto);
-        user.setId(userId);
-        userStorage.updateUser(user);
-        log.debug("User with id ({}) was updated", user.getId());
-        return UserMapper.toUserDto(user);
+        if (userDto.getName() != null) {
+            updatedUser.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null) {
+            updatedUser.setEmail(userDto.getEmail());
+        }
+        userRepository.save(updatedUser);
+        return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public void deleteUserById(long userId) {
-        userStorage.deleteUserById(userId);
-        log.debug("User with id ({}) was deleted", userId);
+        userRepository.deleteById(userId);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        List<UserDto> usersDto = userStorage.getAllUsers().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
-        log.debug("Get all users. Current user counts: {}", usersDto.size());
+        List<UserDto> usersDto = userRepository.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
         return usersDto;
     }
 }

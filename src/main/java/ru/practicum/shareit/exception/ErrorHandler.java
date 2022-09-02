@@ -10,21 +10,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
+    private final ErrorResponse errorResponse = new ErrorResponse();
 
-  @ExceptionHandler
-  public ResponseEntity<?> handleMethodArgumentNotValid(final MethodArgumentNotValidException e) {
+  @ExceptionHandler(value = {MethodArgumentNotValidException.class,
+          ValidationException.class, StateNotValidException.class})
+  public ResponseEntity<?> handleMethodArgumentNotValid(final Throwable e) {
+      errorResponse.setError(e.getMessage());
       log.warn(String.valueOf(e));
-      return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+
+      return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler
   public ResponseEntity<?> handleNotFoundException(final NotFoundException e) {
+      errorResponse.setError(e.getMessage());
       log.warn(String.valueOf(e));
       return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
   }
 
   @ExceptionHandler
   public ResponseEntity<?> handleThrowable(final Throwable e) {
+      errorResponse.setError(e.getMessage());
       log.warn(String.valueOf(e));
       return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }

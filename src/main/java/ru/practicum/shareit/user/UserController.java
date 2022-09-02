@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,13 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/users")
 public class UserController {
     private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     @PostMapping
     public ResponseEntity<UserDto> addUser(@RequestBody @Validated(Create.class) UserDto userDto) {
@@ -40,7 +38,7 @@ public class UserController {
         return new ResponseEntity<>(userDtoList, HttpStatus.OK);
     }
 
-    @PatchMapping(value = "/{userID}")
+    @PatchMapping("/{userID}")
     public UserDto updateUser(@PathVariable long userID,
                          @RequestBody @Valid UserDto userDto) {
         return userService.updateUser(userID, userDto);

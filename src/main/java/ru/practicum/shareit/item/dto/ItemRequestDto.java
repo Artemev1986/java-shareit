@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 @Data
-public class ItemDto {
+public class ItemRequestDto {
     private Long id;
     @NotBlank(message = "{name.notblank}", groups = {Create.class})
     private String name;
