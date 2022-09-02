@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.model;
 
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
@@ -28,10 +27,6 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
-    @Transient
-    private Booking lastBooking;
-    @Transient
-    private Booking nextBooking;
 
     @Override
     public boolean equals(Object o) {

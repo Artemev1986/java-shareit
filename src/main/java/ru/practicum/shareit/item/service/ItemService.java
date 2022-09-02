@@ -10,8 +10,6 @@ import java.util.List;
 public interface ItemService {
     ItemResponseSimpleDto addItem(long userId, ItemRequestDto itemDto);
 
-    ItemResponseSimpleDto getItemById(long itemId);
-
     ItemResponseDto getItemByIdAndUser(long userId, long itemId);
 
     ItemResponseSimpleDto updateItem(long itemId, long userId, ItemRequestDto itemDto);

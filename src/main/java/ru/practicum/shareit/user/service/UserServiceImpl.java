@@ -22,20 +22,20 @@ public class UserServiceImpl implements UserService {
     public UserDto addUser(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
         userRepository.save(user);
+        log.debug("Adding new user with id: {}", user.getId());
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto getUserById(long userId) {
-        UserDto userDto = UserMapper.toUserDto(userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id (" + userId + ") not found")));
+        UserDto userDto = UserMapper.toUserDto(getUser(userId));
+        log.debug("User get by id: {}", userId);
         return userDto;
     }
 
     @Override
     public UserDto updateUser(long userId, UserDto userDto) {
-        User updatedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User with id (" + userId + ") not found"));
+        User updatedUser = getUser(userId);
         if (userDto.getName() != null) {
             updatedUser.setName(userDto.getName());
         }
@@ -43,17 +43,26 @@ public class UserServiceImpl implements UserService {
             updatedUser.setEmail(userDto.getEmail());
         }
         userRepository.save(updatedUser);
+        log.debug("User with id ({}) was updated", updatedUser.getId());
         return UserMapper.toUserDto(updatedUser);
     }
 
     @Override
     public void deleteUserById(long userId) {
+        getUser(userId);
         userRepository.deleteById(userId);
+        log.debug("User with id ({}) was deleted", userId);
     }
 
     @Override
     public List<UserDto> getAllUsers() {
         List<UserDto> usersDto = userRepository.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        log.debug("Get all users. Current user counts: {}", usersDto.size());
         return usersDto;
+    }
+
+    private User getUser(long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User with id (" + id + ") not found"));
     }
 }
