@@ -1,5 +1,6 @@
 package ru.practicum.shareit.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.practicum.shareit.Create;
 

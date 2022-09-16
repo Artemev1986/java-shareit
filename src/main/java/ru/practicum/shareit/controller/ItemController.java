@@ -13,10 +13,13 @@ import ru.practicum.shareit.dto.ItemResponseSimpleDto;
 import ru.practicum.shareit.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/items")
 public class ItemController {
@@ -37,8 +40,11 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ItemResponseDto>> getUserItems(@RequestHeader(SHARER_USER_ID) Long userId) {
-        List<ItemResponseDto> itemDtoList = itemService.getUserItems(userId);
+    public ResponseEntity<List<ItemResponseDto>> getUserItems(
+            @RequestHeader(SHARER_USER_ID) Long userId,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
+            @Positive @RequestParam(required = false, defaultValue = "20") int size) {
+        List<ItemResponseDto> itemDtoList = itemService.getUserItems(userId, from, size);
         if (itemDtoList.isEmpty()) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.NO_CONTENT);
         }
@@ -52,8 +58,11 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemResponseSimpleDto>> searchItems(@RequestParam(name = "text") String text) {
-        List<ItemResponseSimpleDto> itemDtoList = itemService.searchItems(text);
+    public ResponseEntity<List<ItemResponseSimpleDto>> searchItems(
+            @RequestParam(name = "text") String text,
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
+            @Positive @RequestParam(required = false, defaultValue = "20") int size) {
+        List<ItemResponseSimpleDto> itemDtoList = itemService.searchItems(text, from, size);
         if (text.isBlank() || text.isEmpty()) {
             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK);
         } else if (itemDtoList.isEmpty()) {

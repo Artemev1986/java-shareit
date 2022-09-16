@@ -2,6 +2,9 @@ package ru.practicum.shareit.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.model.Status;
 import ru.practicum.shareit.model.Booking;
@@ -36,7 +39,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseSimpleDto addItem(long userId, ItemRequestDto itemDto) {
-        User owner = getUser(userId);
+        User owner = getUserById(userId);
         Item item = ItemMapper.toItem(itemDto);
         item.setOwner(owner);
         itemRepository.save(item);
@@ -46,8 +49,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseDto getItemByIdAndUser(long userId, long itemId) {
-        Item item = getItem(itemId);
-        User owner = getUser(userId);
+        Item item = getItemById(itemId);
+        User owner = getUserById(userId);
             Booking last = bookingRepository
                     .findFirstByItemOwnerAndStartBeforeAndStatusOrderByStartDesc(
                             owner, LocalDateTime.now(), Status.APPROVED);
@@ -66,8 +69,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemResponseSimpleDto updateItem(long itemId, long userId, ItemRequestDto itemDto) {
-        Item itemFromMemory = getItem(itemId);
-        getUser(userId);
+        Item itemFromMemory = getItemById(itemId);
+        getUserById(userId);
         Item item = ItemMapper.toItem(itemDto);
         if (itemFromMemory.getOwner().getId() == userId) {
             item.setId(itemId);
@@ -92,9 +95,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseDto> getUserItems(long userId) {
-        User owner = getUser(userId);
-        List<ItemResponseDto> itemDtoList = itemRepository.findAllByOwnerOrderByIdAsc(owner).stream()
+    public List<ItemResponseDto> getUserItems(long userId, int from, int size) {
+        User owner = getUserById(userId);
+        Pageable page = PageRequest.of(from / size, size, Sort.by("id").ascending());
+        List<ItemResponseDto> itemDtoList = itemRepository.findAllByOwnerOrderByIdAsc(owner, page).stream()
                 .map(item -> ItemMapper.toItemBookingDto(
                         item,
                         bookingRepository.findFirstByItemAndStartBeforeAndStatusOrderByStartDesc(
@@ -106,8 +110,9 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemResponseSimpleDto> searchItems(String text) {
-        List<ItemResponseSimpleDto> itemDtoList = itemRepository.findByText(text).stream()
+    public List<ItemResponseSimpleDto> searchItems(String text, int from, int size) {
+        Pageable page = PageRequest.of(from / size, size, Sort.by("id").ascending());
+        List<ItemResponseSimpleDto> itemDtoList = itemRepository.findByText(text, page).stream()
                 .map(ItemMapper::toItemDto).collect(Collectors.toList());
         log.debug("Search items by text: {}. Found {} items", text, itemDtoList.size());
         return itemDtoList;
@@ -115,8 +120,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
-        User author = getUser(userId);
-        Item item = getItem(itemId);
+        User author = getUserById(userId);
+        Item item = getItemById(itemId);
 
         if (bookingRepository
                 .findFirstByItemAndBookerAndStartBeforeAndStatusOrderByStartDesc(
@@ -129,12 +134,12 @@ public class ItemServiceImpl implements ItemService {
         return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
 
-    private Item getItem(long id) {
+    private Item getItemById(long id) {
         return itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item with id (" + id + ") not found"));
     }
 
-    private User getUser(long id) {
+    private User getUserById(long id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id (" + id + ") not found"));
     }
