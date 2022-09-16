@@ -48,7 +48,7 @@ class BookingControllerTest {
     private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         user.setName("Mikhail");
         user.setEmail("Mikhail@gmail.com");
 

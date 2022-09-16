@@ -49,7 +49,7 @@ class RequestControllerTest {
     private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         user.setId(1L);
         user.setName("Mikhail");
         user.setEmail("Mikhail@gmail.com");
@@ -116,7 +116,7 @@ class RequestControllerTest {
     }
 
     @Test
-    void GetAllByUserIdPage() throws Exception {
+    void getAllByUserIdPage() throws Exception {
         Mockito
                 .when(requestService.getAllByUserId(anyLong(), anyInt(), anyInt()))
                 .thenReturn(List.of(requestResponseDto));

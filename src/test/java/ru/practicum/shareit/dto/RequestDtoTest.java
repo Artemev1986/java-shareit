@@ -22,7 +22,7 @@ class RequestDtoTest {
     private final RequestResponseDto requestDto = new RequestResponseDto();
 
     @Test
-    void RequestDto() throws IOException {
+    void requestDto() throws IOException {
         requestDto.setId(1L);
         requestDto.setDescription("request");
         requestDto.setCreated(LocalDateTime.of(2022, 9, 20, 1, 1, 1));

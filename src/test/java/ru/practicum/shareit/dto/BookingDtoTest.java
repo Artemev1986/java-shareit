@@ -31,7 +31,7 @@ class BookingDtoTest {
     LocalDateTime end = LocalDateTime.of(2022, 9, 21, 1, 1, 1);
 
     @BeforeEach
-    void BeforeEach() {
+    void beforeEach() {
         bookingRequestDto.setItemId(1L);
         bookingRequestDto.setStart(start);
         bookingRequestDto.setEnd(end);
