@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.dto.ItemResponseSimpleDto;
 import ru.practicum.shareit.dto.RequestQueryDto;
 import ru.practicum.shareit.dto.RequestResponseDto;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -56,9 +57,8 @@ public class RequestServiceImpl implements RequestService {
         List<RequestResponseDto> requestList = requestRepository.findAllByRequestorOrderByCreatedDesc(user).stream()
                 .map(request -> RequestMapper.toRequestDto(
                         request,
-                        itemRepository.findAllByRequestId(request.getId()).stream()
-                                .map(ItemMapper::toItemDto)
-                                .collect(Collectors.toList()))).collect(Collectors.toList());
+                        getAllItemsByRequest(request)))
+                .collect(Collectors.toList());
         log.debug("Get all request by user with id: {}", userId);
         return requestList;
     }
@@ -67,24 +67,35 @@ public class RequestServiceImpl implements RequestService {
     public List<RequestResponseDto> getAllByUserId(long userId, int from, int size) {
         User user = getUserById(userId);
         Pageable page = PageRequest.of(from / size, size, Sort.by("created").ascending());
-        List<RequestResponseDto> requestList = requestRepository.findAllByRequestorNotOrderByCreatedDesc(user, page).stream()
+        List<RequestResponseDto> requestList = requestRepository
+                .findAllByRequestorNotOrderByCreatedDesc(user, page).stream()
                 .map(request -> RequestMapper.toRequestDto(
                         request,
-                        itemRepository.findAllByRequestId(request.getId()).stream()
-                                .map(ItemMapper::toItemDto)
-                                .collect(Collectors.toList())))
+                        getAllItemsByRequest(request)))
                 .collect(Collectors.toList());
                 log.debug("Get all request by user with id: {}", userId);
         return requestList;
     }
 
+    private List<ItemResponseSimpleDto> getAllItemsByRequest(Request request) {
+        List<ItemResponseSimpleDto> items = itemRepository.findAllByRequestId(request.getId()).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+        log.debug("Get all items by request with id: {}, size: {}", request.getId(), items.size());
+        return items;
+    }
+
     private User getUserById(long id) {
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id (" + id + ") not found"));
+        log.debug("User get by id: {}", id);
+        return user;
     }
 
     private Request getRequestById(long requestId) {
-        return requestRepository.findById(requestId)
+        Request request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new NotFoundException("Request with id (" + requestId + ") not found"));
+        log.debug("Request get by id: {}", requestId);
+        return request;
     }
 }

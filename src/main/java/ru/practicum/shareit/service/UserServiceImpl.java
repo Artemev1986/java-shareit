@@ -63,7 +63,9 @@ public class UserServiceImpl implements UserService {
     }
 
     private User getUser(long id) {
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id (" + id + ") not found"));
+        log.debug("User get by id: {}", id);
+        return user;
     }
 }

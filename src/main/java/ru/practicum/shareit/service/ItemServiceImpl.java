@@ -54,17 +54,25 @@ public class ItemServiceImpl implements ItemService {
             Booking last = bookingRepository
                     .findFirstByItemOwnerAndStartBeforeAndStatusOrderByStartDesc(
                             owner, LocalDateTime.now(), Status.APPROVED);
+        log.debug("Get last booking by owner with id: {}", owner.getId());
             Booking next = bookingRepository
                     .findFirstByItemOwnerAndStartAfterAndStatusOrderByStartAsc(
                             owner, LocalDateTime.now(), Status.APPROVED);
+        log.debug("Get next booking by owner with id: {}", owner.getId());
+
         log.debug("Item get by id: {} and owner id: {}", itemId, userId);
         return ItemMapper.toItemBookingDto(item, last, next, getComments(item));
     }
 
     private List<CommentDto> getComments(Item item) {
-        return commentRepository.findAllByItemOrderByCreated(item).stream()
+        getItemById(item.getId());
+
+        List<CommentDto> comments = commentRepository.findAllByItemOrderByCreated(item).stream()
                 .map(CommentMapper::toCommentDto)
                 .collect(Collectors.toList());
+
+        log.debug("Get comments for item with id: {}. Current comment counts: {}", item.getId(), comments.size());
+        return comments;
     }
 
     @Override
@@ -101,12 +109,27 @@ public class ItemServiceImpl implements ItemService {
         List<ItemResponseDto> itemDtoList = itemRepository.findAllByOwnerOrderByIdAsc(owner, page).stream()
                 .map(item -> ItemMapper.toItemBookingDto(
                         item,
-                        bookingRepository.findFirstByItemAndStartBeforeAndStatusOrderByStartDesc(
-                                item, LocalDateTime.now(), Status.APPROVED),
-                        bookingRepository.findFirstByItemAndStartAfterAndStatusOrderByStartAsc(
-                                item, LocalDateTime.now(), Status.APPROVED), getComments(item))).collect(Collectors.toList());
+                        getLastBookingByItem(item),
+                        getNextBookingByItem(item),
+                        getComments(item)))
+                .collect(Collectors.toList());
+
         log.debug("Get user items. Current item counts: {}", itemDtoList.size());
         return itemDtoList;
+    }
+
+    private Booking getLastBookingByItem(Item item) {
+        Booking booking = bookingRepository.findFirstByItemAndStartBeforeAndStatusOrderByStartDesc(
+                item, LocalDateTime.now(), Status.APPROVED);
+        log.debug("Get last booking by item with id: {}", item.getId());
+        return booking;
+    }
+
+    private Booking getNextBookingByItem(Item item) {
+        Booking booking = bookingRepository.findFirstByItemAndStartAfterAndStatusOrderByStartAsc(
+                item, LocalDateTime.now(), Status.APPROVED);
+        log.debug("Get next booking by item  with id: {}", item.getId());
+        return booking;
     }
 
     @Override
@@ -135,12 +158,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Item getItemById(long id) {
-        return itemRepository.findById(id)
+        Item item = itemRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Item with id (" + id + ") not found"));
+        log.debug("Item get by id: {}", id);
+        return item;
     }
 
     private User getUserById(long id) {
-        return userRepository.findById(id)
+        User user = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id (" + id + ") not found"));
+        log.debug("User get by id: {}", id);
+        return user;
     }
 }

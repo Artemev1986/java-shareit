@@ -121,7 +121,9 @@ public class BookingServiceImpl implements BookingService {
             default:
                 list = new ArrayList<>();
         }
-        log.debug("Get received all bookings for user with id: {}. Get {} bookings", userId, list.size());
+        log.debug("Get received all bookings for user with id: {}. Get {} bookings. State: {}",
+                userId, list.size(), state);
+
         return list.stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
@@ -163,24 +165,32 @@ public class BookingServiceImpl implements BookingService {
             default:
                 list = new ArrayList<>();
         }
-        log.debug("Get received all bookings for owner with id: {}. Get {} bookings", userId, list.size());
+        log.debug("Get received all bookings for owner with id: {}. Get {} bookings. State: {}",
+                userId, list.size(), state);
+
         return list.stream()
                 .map(BookingMapper::toBookingDto)
                 .collect(Collectors.toList());
     }
 
     private User getUserById(long userId) {
-        return userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User with id (" + userId + ") not found"));
+        log.debug("User get by id: {}", userId);
+        return user;
     }
 
     private Item getItemById(long itemId) {
-        return itemRepository.findById(itemId)
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item with id (" + itemId + ") not found"));
+        log.debug("Item get by id: {}", itemId);
+        return item;
     }
 
     private Booking getBookingById(long bookingId) {
-        return bookingRepository.findById(bookingId)
+        Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new NotFoundException("Booking with id (" + bookingId + ") not found"));
+        log.debug("Booking get by id: {}", bookingId);
+        return booking;
     }
 }
