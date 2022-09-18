@@ -189,6 +189,9 @@ class ItemServiceTest {
                         .findFirstByItemAndStartAfterAndStatusOrderByStartAsc(any(), any(), any()))
                 .thenReturn(bookingNext);
         Mockito
+                .when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.of(item));
+        Mockito
                 .when(commentRepository.findAllByItemOrderByCreated(item))
                 .thenReturn(List.of(comment));
 
