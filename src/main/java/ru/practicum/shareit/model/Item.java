@@ -9,13 +9,12 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity
 @Table(name = "items")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "item_id")
     private Long id;
     @Column(name = "name", nullable = false, length = 100)
     private String name;
@@ -26,6 +25,8 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+    @Column(name = "request_id", nullable = false)
+    private Long requestId;
 
     @Override
     public boolean equals(Object o) {

@@ -15,4 +15,5 @@ public class ItemRequestDto {
     private String description;
     @NotNull(message = "{available.notnull}", groups = {Create.class})
     private Boolean available;
+    private Long requestId;
 }

@@ -9,13 +9,12 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "user_id")
     private Long id;
     @Column(name = "name", nullable = false, length = 100)
     private String name;

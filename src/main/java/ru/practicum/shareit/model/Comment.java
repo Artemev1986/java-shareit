@@ -10,13 +10,12 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
 @Entity
 @Table(name = "comments")
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "comment_id")
     private Long id;
 
     @ManyToOne
