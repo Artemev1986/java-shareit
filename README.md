@@ -37,10 +37,14 @@ The following commands are available in this service:
 
 ### How to run this project :
 
+#### First you need to build the project
+
 ```sh
-##First you need to build the project
+##build the project
 mvn clean install
 ```
+
+#### Next, you can build and run containers
 
 ```sh
 ##start up all containers. Use the -d option to start up in deamon mode
